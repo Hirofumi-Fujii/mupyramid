@@ -1,0 +1,17 @@
+Histogram は一般に大量のメモリを動的に確保する必要がある。
+一方、histogram 自身も数が多くなると、配列や STL のコンテナクラスに
+入れたくなる。
+配列や STL のコンテナクラスに入れることを考慮すると、default constructor が
+欲しくなる。更に default constructor で生成した object に対しては、代入演算を
+行いたくなる（内容が全く同じ histogram をたくさん作っても意味がない）。
+代入演算を行えば、最初に default constructor で確保したメモリを（使わないまま）
+解放するという無駄が生じる。この無駄を防ぐために、default constructor では
+動的確保は行わないという手もあるが、これをやると各メンバー関数で、動的確保が
+行われているか否かの判断が必要になる。
+Histogram を pointer で使うという手もあるが、例によって解放を忘れる危険が伴う。
+
+Histogram の性質から、constructor の呼び出しよりは、各メンバー関数の呼び出しの
+方が圧倒的に多いはずなので、無駄を承知で default constructor においても
+メモリの確保を行うことにする。（std::vector を使うのがよいかも知れない。
+この場合は vector の実装が賢いことを期待。）
+
