@@ -8,7 +8,7 @@ DataBank::DataBank ()
 {
 	m_numdaqboxes = 0;
 	for (int i = 0; i < 256; i++)
-		m_daqboxno[i] = NUM_DAQBOXES;
+		m_daqboxno[i] = INVALID_DAQBOXNO;
 	for (unsigned int u = 0; u < NUM_DAQBOXES; u++)
 		m_daqboxchar[u] = (char)(0);
 }
@@ -32,8 +32,8 @@ DataBank::getrecord (unsigned int unitno, std::istream& is, std::ostream& os,
 		{
 			if (recstr.substr (0,3) == "DAT")
 			{
-				unsigned int uno = m_daqboxno[(unsigned int)(recstr[3]) & 255];
-				if (uno < NUM_DAQBOXES)
+				int uno = m_daqboxno[(unsigned int)(recstr[3]) & 255];
+				if (uno != INVALID_DAQBOXNO)
 				{
 					DataRecord rec (recstr);
 					m_datalist[uno].push_back (rec);
@@ -46,9 +46,9 @@ DataBank::getrecord (unsigned int unitno, std::istream& is, std::ostream& os,
 				{
 					unsigned int uc = (unsigned int)(recstr[3]) & 255;
 					if ((m_numdaqboxes < NUM_DAQBOXES) &&
-						(m_daqboxno[uc] >= NUM_DAQBOXES))
+						(m_daqboxno[uc] == INVALID_DAQBOXNO))
 					{
-						m_daqboxno[uc] = m_numdaqboxes;
+						m_daqboxno[uc] = (int)(m_numdaqboxes);
 						m_daqboxchar[m_numdaqboxes] = recstr[3];
 						++m_numdaqboxes;
 					}

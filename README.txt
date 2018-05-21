@@ -1,6 +1,7 @@
 ﻿このパッケージについて
 
 　　　　　　　　　　　　　　　　　　　　　藤井啓文
+　　　　　　　　　　　　　　　　　　(2018年05月21日 追記)
 　　　　　　　　　　　　　　　　　　(2018年05月17日 記載)
 
 このパッケージは、pyramid の muon radiography 観測の
@@ -45,6 +46,12 @@ namespace MUONDAQ の中の DataBank class の中で
 
 と設定されています。
 
+【Rawdata file における DAQBox の Id】
+現在の DAQ program が記録する rawdata file 中での DAQBox Id は
+
+	'7', '8', '9', 'a'
+
+の4つが使われています。
 
 以下は、以前のパッケージからのコピーです。
 

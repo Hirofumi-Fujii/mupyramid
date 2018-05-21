@@ -14,6 +14,7 @@ namespace MUONDAQ
 class DataBank
 {
 public:
+	static const int INVALID_DAQBOXNO = -1;
 	static const unsigned int NUM_DAQBOXES = 4;
 
 public:
@@ -24,13 +25,15 @@ public:
 	unsigned int numdaqboxes () const { return m_numdaqboxes; }
 	char daqboxchar (unsigned int idx) const
 		{ if (idx < NUM_DAQBOXES) return m_daqboxchar[idx]; return (char)(0); }
+	int daqboxno (char boxchar) const
+		{ return m_daqboxno[(unsigned int)(boxchar) & 255]; }
 
 public:
 	std::list<DataRecord> m_datalist[NUM_DAQBOXES];
 
 private:
 	unsigned int m_numdaqboxes;
-	unsigned int m_daqboxno[256];
+	int m_daqboxno[256];
 	char m_daqboxchar[NUM_DAQBOXES];
 };
 
