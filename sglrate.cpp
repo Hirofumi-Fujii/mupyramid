@@ -35,6 +35,8 @@ SingleRate::Clear ()
 	for (int i = 0; i < MAX_DAQBOXES; i++)
 	{
 		m_unithits [i] = 0.0;
+		m_tufirst [i] = 0.0;
+		m_tulast [i] = 0.0;
 		for (int x = 0; x < NUM_XCHANNELS; x++)
 			m_xhits [i][x] = 0.0;
 		for (int y = 0; y < NUM_YCHANNELS; y++)
@@ -132,6 +134,9 @@ SingleRate::Cumulate (std::istream& is)
 								nn = MAX_TNHIST - 1;
 							m_tnhist [unitno][nn] += 1.0;
 						}
+						else
+							m_tufirst [unitno] = xydata.clockcount ().microsec ();
+						m_tulast [unitno] = xydata.clockcount ().microsec ();
 						m_prev_clock [unitno] = xydata.clockcount ();
 						m_unithits [unitno] += 1.0;
 					}
@@ -165,15 +170,28 @@ SingleRate::Cumulate (std::istream& is)
 void
 SingleRate::CSVwrite (std::ostream& os) const
 {
+	unsigned uoldprec = os.precision ();
+	os.precision (20);
+
 	os << "DAQboxes," << m_numdaqboxes << std::endl;
 	os << "Name";
 	for (int i = 0; i < m_numdaqboxes; i++)
-		os << "," << "BOX" << m_daqboxname[i];
+		os << ',' << "BOX" << m_daqboxname[i];
 	os << std::endl;
 
 	os << "TotalHits";
 	for (int i = 0; i < m_numdaqboxes; i++)
 		os << ',' << m_unithits [i];
+	os << std::endl;
+
+	os << "FirstClock(micro-sec)";
+	for (int i = 0; i < m_numdaqboxes; i++)
+		os << ',' << m_tufirst [i];
+	os << std::endl;
+
+	os << "LastClock(micro-sec)";
+	for (int i = 0; i < m_numdaqboxes; i++)
+		os << ',' << m_tulast [i];
 	os << std::endl;
 
 	os << "X-channel";
@@ -281,6 +299,9 @@ SingleRate::CSVwrite (std::ostream& os) const
 			os << std::endl;
 		}
 	}
+
+	os.precision(uoldprec);
+
 }
 
 }	// namespace MUONDAQ

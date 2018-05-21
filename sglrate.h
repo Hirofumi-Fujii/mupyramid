@@ -40,6 +40,8 @@ protected:
 	double m_xhits [MAX_DAQBOXES][NUM_XCHANNELS];
 	double m_yhits [MAX_DAQBOXES][NUM_YCHANNELS];
 	BBTX036MULTI::XYUnitClock m_prev_clock[MAX_DAQBOXES];
+	double m_tufirst [MAX_DAQBOXES];
+	double m_tulast [MAX_DAQBOXES];
 	double m_tmhist [MAX_DAQBOXES][MAX_TMHIST];
 	double m_thhist [MAX_DAQBOXES][MAX_THHIST];
 	double m_tuhist [MAX_DAQBOXES][MAX_TUHIST];

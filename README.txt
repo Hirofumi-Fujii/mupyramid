@@ -37,6 +37,13 @@ Pyramid 内への搬入を容易にするため、各面は中央で折りたた
 入力毎にリセットされ、マイクロ秒カウンターと連動して時刻情報を
 構成します。
 
+【プログラムパッケージにおける DAQbox の数】
+本プログラムパッケージでは、DAQbox の数は、databank.h の
+namespace MUONDAQ の中の DataBank class の中で
+
+        static const unsigned int NUM_DAQBOXES = 4;
+
+と設定されています。
 
 
 以下は、以前のパッケージからのコピーです。
