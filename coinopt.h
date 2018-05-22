@@ -25,7 +25,7 @@ public:
 	bool m_singledump;
 	bool m_mergedump;
 	bool m_longdump;
-	double m_toffset [256];
+	unsigned int m_toffset [256];
 };
 
 }	// namespace MUONDAQ

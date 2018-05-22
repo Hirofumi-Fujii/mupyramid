@@ -17,7 +17,7 @@ Coinopt::Coinopt()
 	m_mergedump = false;
 	m_longdump = false;
 	for (int i = 0; i < 256; i++)
-		m_toffset [i] = 0.0;
+		m_toffset [i] = (unsigned int)(0);
 }
 
 Coinopt::~Coinopt()
@@ -39,7 +39,7 @@ Coinopt::usage (std::ostream& os, const char* pname) const
 		<< " -longdump\toutput with raw data.\n"
 		<< " -mergedump\toutput with merged data.\n"
 		<< " -shortdump\toutput without raw/merged data.\n"
-		<< " -toff DAQboxId usec\toffset for DAQbox-timecounter in micro-sec.\n"
+		<< " -toff DAQboxId usec\toffset for DAQbox-timecounter in nano-sec.\n"
 		<< std::endl;
 }
 
@@ -134,8 +134,8 @@ Coinopt::set (int argc, char* argv[])
 				}
 				char boxid = *argv[ip++];
 				std::stringstream ss (argv[ip++]);
-				double dv;
-				if (!(ss >> dv))
+				unsigned int uv;
+				if (!(ss >> uv))
 				{
 					std::cerr << "ERROE "
 						<< word
@@ -144,7 +144,7 @@ Coinopt::set (int argc, char* argv[])
 					result = false;
 					break;
 				}
-				m_toffset [(unsigned int)(boxid) & 255] = dv;
+				m_toffset [(unsigned int)(boxid) & 255] = uv;
 			}
 			else
 			{

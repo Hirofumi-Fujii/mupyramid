@@ -19,6 +19,9 @@ Coinmake::Coinmake (Coinopt& opt)
 	m_singledump = opt.m_singledump;
 	m_mergedump = opt.m_mergedump;
 	m_longdump = opt.m_longdump;
+	for (int i = 0; i < 256; i++)
+		m_toffset[i] = opt.m_toffset[i];
+	// 
 }
 
 Coinmake::~Coinmake ()
@@ -90,6 +93,20 @@ Coinmake::make (std::istream& is, std::ostream& os)
 				recnow[u] = databank.getrecord (u, is, os);
 			}
 		}
+	}
+
+	// Set and dump the m_clockoffset []
+	os << "INFO "
+		<< "databank.numdaqboxes () " << databank.numdaqboxes ()
+		<< std::endl;
+	for (unsigned int u = 0; u < databank.numdaqboxes (); u++)
+	{
+		char cid = databank.daqboxchar (u);
+		unsigned int uoffs = m_toffset [(unsigned int)(cid) & 255];
+		m_clockoffset [u] = BBTX036MULTI::XYUnitClock (uoffs);
+		os << "INFO "
+			<< "m_clockoffset[" << u << "] = m_toffset[" << cid << "] " << uoffs
+			<< std::endl;
 	}
 
 	// Dump the DAQBox information

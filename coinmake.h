@@ -41,6 +41,7 @@ protected:
 	bool m_singledump;
 	bool m_mergedump;
 	bool m_longdump;
+	unsigned int m_toffset[256];
 	BBTX036MULTI::XYUnitClock m_clockoffset [DataBank::NUM_DAQBOXES];
 };
 
