@@ -53,6 +53,46 @@ namespace MUONDAQ の中の DataBank class の中で
 
 の4つが使われています。
 
+【gencoinz の出力について】
+gencoin が独自に出力する record は基本的に COIN record のみです（起動
+情報を残すためINFO record や raw data 情報も出力します）。
+rawdata file から DATx record を取り出し、解析します。それ以外の
+record は、そのまま出力します。
+
+COIN record の format は、従来の format を踏襲し、DAQbox 2台を対に
+して 1ユニットとし、従来の XY 情報を出すユニットとして扱っています。
+従来の format は 3ユニット構成ですので、最後の 1ユニット分は
+使っていません。
+
+この gencoinz での format は
+
+COIN n1 n2 n3 xh1 xc1 xav1 yh1 yc1 yav1 usec1 nsec1 xh2 xc2 xav2 yh2 yc2 yav2 usec2 nsec2 xh3 xc3 xav3 yh3 yc3 yav3 usec3 nsec3
+
+です。
+最初の n1 n2 n3 は、各ユニットでの対となる DAQbox の hit状況を示します。
+　値が 1 は X のみに data があった
+　値が 2 は Y のみに data があった
+　値が 3 は X および Y に data があった
+ことを示します。n3 は常に 0 です。
+従って、飛程が決定できる record は
+
+COIN 3 3 0
+
+で始まります。ユニット間の coincidence があった場合のみ出力されますので、
+n1 および n2 は常に 0 より大きい値です。
+
+以下
+xh*   x-plane での hit 数
+xc*   x-plane での cluster 数
+xav*  x の平均値（整数、チャネル数の10倍単位、すなわちほぼミリメートル）
+yh*   y-plane での hit 数
+yc*   y-plane での cluster 数
+yav*  y の平均値（整数、チャネル数の10倍単位、すなわちほぼミリメートル）
+usec* マイクロ秒カウンタの値
+nsec* ナノ秒カウンタの値
+です。
+
+
 以下は、以前のパッケージからのコピーです。
 
 ===================================================================
