@@ -67,7 +67,7 @@ Coinmake::make (std::istream& is, std::ostream& os)
 	MUONDAQ::DataRecord recnow[MUONDAQ::DataBank::NUM_DAQBOXES];
 	BBTX036MULTI::XYUnitData xymerged[MUONDAQ::DataBank::NUM_DAQBOXES];
 
-	// Making the first merged data
+	// Making the merged data for each DAQBox
 	int nready = 0;
 	for (unsigned int u = 0; u < MUONDAQ::DataBank::NUM_DAQBOXES; u++)
 	{
@@ -112,6 +112,8 @@ Coinmake::make (std::istream& is, std::ostream& os)
 	}
 
 	//
+	// Making the coincidence record.
+	//
 	while (1)
 	{
 		// Find the earliest unit.
@@ -124,7 +126,8 @@ Coinmake::make (std::istream& is, std::ostream& os)
 				++nready;
 				if (earliest < 0)
 					earliest = (int)(u);
-				else if (xymerged[earliest].clockcount() > xymerged[u].clockcount())
+				else if ((xymerged[earliest].clockcount() + m_clockoffset[earliest])
+						 > (xymerged[u].clockcount() + m_clockoffset[u]))
 					earliest = (int)(u);
 			}
 		}
@@ -134,11 +137,11 @@ Coinmake::make (std::istream& is, std::ostream& os)
 		std::list<MUONDAQ::DataRecord> coinlist;		
 		int ncoin[MUONDAQ::DataBank::NUM_DAQBOXES] = { 0 };
 		BBTX036MULTI::XYUnitData xycoin[MUONDAQ::DataBank::NUM_DAQBOXES];
-		BBTX036MULTI::XYUnitClock xytms = xymerged[earliest].clockcount();
+		BBTX036MULTI::XYUnitClock xytms = xymerged[earliest].clockcount() + m_clockoffset[earliest];
 		BBTX036MULTI::XYUnitClock xytme = xytms + coinwidth;
 		for (unsigned int u = 0; u < MUONDAQ::DataBank::NUM_DAQBOXES; u++)
 		{
-			if (xymerged[u].ready() && (xymerged[u].clockcount() <= xytme))
+			if (xymerged[u].ready() && ((xymerged[u].clockcount() + m_clockoffset[u]) <= xytme))
 			{
 				// inside the coincidence window
 				ncoin[u] += 1;
@@ -161,15 +164,16 @@ Coinmake::make (std::istream& is, std::ostream& os)
 				if (recnow[u].ready())
 				{
 					++nready;
-					BBTX036MULTI::XYUnitClock tms = recnow[u].clockcount();
+					BBTX036MULTI::XYUnitClock tms = recnow[u].clockcount() + m_clockoffset[u];
 					BBTX036MULTI::XYUnitClock tme = tms + mergewidth;
 					mergelist[u].push_back (recnow[u]);
 					recnow[u] = databank.getrecord (u, is, os);
-					while (recnow[u].ready() && (recnow[u].clockcount() <= tme))
+					while (recnow[u].ready() &&
+						((recnow[u].clockcount() + m_clockoffset[u]) <= tme))
 					{
 						mergelist[u].push_back (recnow[u]);
 						xymerged[u] = xymerged[u] | recnow[u].xyunitdata ();
-						tms = recnow[u].clockcount();
+						tms = recnow[u].clockcount() + m_clockoffset[u];
 						tme = tms + mergewidth;
 						recnow[u] = databank.getrecord (u, is, os);
 					}
@@ -249,13 +253,15 @@ Coinmake::make (std::istream& is, std::ostream& os)
 					unsigned int ut = ux;
 					if ((nxh > 0) && (nyh > 0))
 					{
-						if (xycoin[uy].clockcount() > xycoin[ux].clockcount())
+						if ((xycoin[uy].clockcount() + m_clockoffset[uy])
+							> (xycoin[ux].clockcount() + m_clockoffset[ux]))
 							ut = uy;
 					}
 					else if (nyh > 0)
 						ut = uy;
-					msec = xycoin[ut].microsec();
-					nsec = xycoin[ut].nanosec();
+					BBTX036MULTI::XYUnitClock coinclock = xycoin[ut].clockcount() + m_clockoffset[ut];
+					msec = coinclock.microsec();
+					nsec = coinclock.nanosec();
 				}
 				os
 					<< std::dec
