@@ -53,7 +53,55 @@ namespace MUONDAQ の中の DataBank class の中で
 
 の4つが使われています。
 
-【gencoinz の出力について】
+【gencoinz について】
+gencoinz は、rawdata file から 各DAQBox の clock を調べ、
+同時と判定された event を出力します。
+
+[使用法]
+使用法は
+
+  gencoinz [options] rawdata-file
+
+です。出力は default では標準出力です。出力ファイルを指定する場合は
+option
+
+  -out outfile
+
+で指定します。出力ファイルを指定した場合は、出力は gzip で圧縮
+されます。
+
+一つの DAQBox 内でも時間的に非常に近接する事象は同一事象として
+扱うことができます。この時間幅 mwidth は
+
+  -merge mwidth
+
+で指定します。時間幅 mwidth の単位はナノ秒です。
+
+
+DAQBox 間の coincidence 幅 cwidth は
+
+  -width cwidth
+
+で指定します。Coincidence 幅 cwidth の単位はナノ秒です。
+
+何等かの原因で DAQBox のクロックカウントがずれている場合、クロックカウントの
+オフセットを指定することができます。DAQBoxの識別子が id である DAQBox に
+対し offset を設定するには
+
+  -toffset id offset
+
+で指定します。この offset の単位はナノ秒で、この値を加算して
+DAQBox 間の同期を判定します。この offset は符号無し整数で与えます。
+従って、最も進んでいるクロックカウントの DAQBox がオフセット 0 に
+なるようにして残りに正のオフセットを与えてください。
+例えば DAQBox 7 8 9 a が使われていて、8 が 12マイクロ秒
+進んでいる場合は、
+
+  -toffset 7 12000 -toffset 9 12000 -toffset a 12000
+
+としてください。
+
+[出力 record について]
 gencoin が独自に出力する record は基本的に COIN record のみです（起動
 情報を残すためINFO record や raw data 情報も出力します）。
 rawdata file から DATx record を取り出し、解析します。それ以外の

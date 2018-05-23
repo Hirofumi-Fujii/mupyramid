@@ -95,9 +95,10 @@ Coinmake::make (std::istream& is, std::ostream& os)
 		}
 	}
 
-	// Set and dump the m_clockoffset []
+	// Set the m_clockoffset [] and 
+	// Write the additional INFO
 	os << "INFO "
-		<< "databank.numdaqboxes () " << databank.numdaqboxes ()
+		<< "databank.numdaqboxes() = " << databank.numdaqboxes ()
 		<< std::endl;
 	for (unsigned int u = 0; u < databank.numdaqboxes (); u++)
 	{
@@ -105,7 +106,7 @@ Coinmake::make (std::istream& is, std::ostream& os)
 		unsigned int uoffs = m_toffset [(unsigned int)(cid) & 255];
 		m_clockoffset [u] = BBTX036MULTI::XYUnitClock (uoffs);
 		os << "INFO "
-			<< "m_clockoffset[" << u << "] = m_toffset[" << cid << "] " << uoffs
+			<< "m_clockoffset[" << u << "] = m_toffset[" << cid << "] = " << uoffs
 			<< std::endl;
 	}
 
