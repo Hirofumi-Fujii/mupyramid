@@ -342,7 +342,7 @@ int main (int argc, char* argv[])
 	while (iarg < argc)
 	{
 		std::string sarg(argv[iarg++]);
-		if ((sarg == "-rate") || (sarg == "-cycle"))
+		if ((sarg == "-rate") || (sarg == "-cycle") || (sarg == "-udist"))
 		{
 			if (iarg >= argc)
 			{
@@ -362,7 +362,15 @@ int main (int argc, char* argv[])
 				binrate = dvalue;
 			else if (sarg == "-cycle")
 				cycletime = dvalue;
+			else if (sarg == "-udist")
+			{
+				udist = dvalue;
+				g_xdist = udist;
+				g_ydist = udist;
+			}
 		}
+		else if (sarg == "-raw")
+			g_accopt = 0;
 		else if ((!listfilegiven) && (sarg[0] != '-'))
 		{
 			listfilename = sarg;
