@@ -1,7 +1,5 @@
-// genpcut.cpp
-// g++ -Wall genpcut.cpp pcutopt.cpp csvarray.cpp jokisch.cpp hist2d.cpp ncpng.cpp -o genpcut
-//
-// 2016-11-18 hist2d version
+// genpcut2.cpp
+// g++ -Wall genpcut2.cpp pcutopt.cpp csvarray.cpp jokisch.cpp mustdrock.cpp hist2d.cpp ncpng.cpp -o genpcut2
 
 #include <iostream>
 #include <fstream>
@@ -9,6 +7,7 @@
 #include <cmath>
 #include "pcutopt.h"
 #include "csvarray.h"
+#include "mustdrock.h"
 #include "jokisch.h"
 #include "hist2d.h"
 
@@ -61,6 +60,11 @@ int main (int argc, char* argv[])
 		opt.usage (std::cerr, argv[0]);
 		return (-1);
 	}
+	if (!opt.m_rngfilename_given)
+	{
+		std::cerr << "ERROR: range filename is missing" << std::endl;
+		return (-1);
+	}
 
 	std::ifstream ifs (opt.m_trxfilename.c_str());
 	if (!ifs)
@@ -73,6 +77,13 @@ int main (int argc, char* argv[])
 	if (!ifs)
 	{
 		std::cerr << "ERROR: cos file " << opt.m_cosfilename << " cannot be opened." << std::endl;
+		return (-2);
+	}
+
+	mylibrary::MuStdRock murock;
+	if (!murock.ReadLBLTEXTFile (opt.m_rngfilename.c_str()))
+	{
+		std::cerr << "ERROR: range file " << opt.m_rngfilename << " cannot be opened." << std::endl;
 		return (-2);
 	}
 
@@ -93,7 +104,7 @@ int main (int argc, char* argv[])
 	std::cout << "Total lines=" << nlinescst << std::endl;
 	if (nlinescst < 1)
 	{
-		std::cerr << "ERROR: this is not a transmittance file"
+		std::cerr << "ERROR: cos file is too small"
 			<< std::endl;
 		return (-2);
 	}
@@ -136,16 +147,19 @@ int main (int argc, char* argv[])
 
 	double pcut = pcut0;
 
-	static const int num2dhist = 1;
+	static const int num2dhist = 2;
 	Hist2D hist2d[num2dhist] =
 	{
-		Hist2D ("Pcut dxdy", -0.5, (double(nxbins) - 0.5), nxbins, -0.5, (double(nybins) - 0.5), nybins),
+		Hist2D ("Pcut dxdy", xmin, xmax, nxbins, ymin, ymax, nybins),
+		Hist2D ("denlen dxdy", xmin, xmax, nxbins, ymin, ymax, nybins),
 	};
 
 	for (int ny = 0; ny < nybins; ny++)
 	{
+		double yv = trxcsv.CellDoubleValue (ny + iyoffs, 0);
 		for (int nx = 0; nx < nxbins; nx++)
 		{
+			double xv = trxcsv.CellDoubleValue (iyoffs - 3, nx + ixoffs);
 			double trx = trxcsv.CellDoubleValue (ny + iyoffs, nx + ixoffs);
 			double cs = cstcsv.CellDoubleValue (ny + iyoffs, nx + ixoffs);
 			if (trx < trxmin)
@@ -158,7 +172,9 @@ int main (int argc, char* argv[])
 			}
 			else
 				pcut = pcut0;
-			hist2d[0].cumulate (double(nx), double(ny), pcut);
+			double rng = murock.CSDARange (pcut) * 0.01;
+			hist2d[0].cumulate (xv, yv, pcut);
+			hist2d[1].cumulate (xv, yv, rng);
 		}
 	}
 	std::cout << "Transmittance min=" << trxmin << " max=" << trxmax
@@ -167,7 +183,7 @@ int main (int argc, char* argv[])
 	for (int nh = 0; nh < num2dhist; nh++)
 	{
 		std::stringstream ss;
-		ss << "genpcut-" << nh << ".csv";
+		ss << "genpcut2-" << nh << ".csv";
 		std::string ofcsvnam;
 		ss >> ofcsvnam;
 		std::ofstream ofcsv (ofcsvnam.c_str());
